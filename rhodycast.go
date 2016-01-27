@@ -113,5 +113,7 @@ func forecastJsonHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Could not marshal Forecast to json", http.StatusInternalServerError)
 		return
 	}
+
+	w.Header().Set("Content-Type", "application/json")
 	w.Write(forecastJson)
 }
