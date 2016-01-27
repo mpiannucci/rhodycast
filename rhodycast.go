@@ -18,6 +18,7 @@ func init() {
 	http.HandleFunc("/", indexHandler)
 	http.HandleFunc("/___fetch___", waveWatchFetchHandler)
 	http.HandleFunc("/forecast_as_json", forecastJsonHandler)
+	http.HandleFunc("/modeldata_as_json", modelDataJsonHandler)
 }
 
 // forecastKey returns the key used for all forecast entries.
@@ -35,8 +36,15 @@ func waveWatchFetchHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, _ := context.WithTimeout(ctxParent, 60*time.Second)
 	client := urlfetch.Client(ctx)
 
+	// Set the location to fetch from
+	riLocation := surfnerd.Location{
+		Latitude:     40.969,
+		Longitude:    360 - 71.127,
+		Elevation:    0,
+		LocationName: "Block Island Buoy - 44097",
+	}
+
 	// Create the model and get its url to fetch the latest data from
-	riLocation := surfnerd.NewLocationForLatLong(40.969, 360-71.127)
 	wwModel := surfnerd.GetWaveModelForLocation(riLocation)
 	wwURL := wwModel.CreateURL(riLocation, 0, 60)
 
@@ -116,4 +124,33 @@ func forecastJsonHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(forecastJson)
+}
+
+func modelDataJsonHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := appengine.NewContext(r)
+
+	// Query the current count of forecasts
+	q := datastore.NewQuery("Forecast")
+	var forecasts []surfnerd.WaveWatchForecast
+	_, keyError := q.GetAll(ctx, &forecasts)
+	if keyError != nil {
+		http.Error(w, keyError.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if len(forecasts) < 1 {
+		http.Error(w, "No forecasts available", http.StatusInternalServerError)
+		return
+	}
+
+	forecast := forecasts[0]
+	modelData := forecast.ToModelData()
+	modelDataJson, jsonErr := modelData.ToJSON()
+	if jsonErr != nil {
+		http.Error(w, "Could not marshal ModelData to json", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(modelDataJson)
 }
