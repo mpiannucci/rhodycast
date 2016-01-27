@@ -1,0 +1,5 @@
+cron:
+- description: Model Update Fetch
+  url: /___fetch___
+  schedule: every 6 hours synchronized
+  timezone: America/New_York
