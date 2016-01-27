@@ -108,6 +108,10 @@ func forecastJsonHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	forecast := forecasts[0]
-	forecastJson := forecast.ToJSON()
-	fmt.Fprint(w, forecastJson)
+	forecastJson, jsonErr := forecast.ToJSON()
+	if jsonErr != nil {
+		http.Error(w, "Could not marshal Forecast to json", http.StatusInternalServerError)
+		return
+	}
+	w.Write(forecastJson)
 }
