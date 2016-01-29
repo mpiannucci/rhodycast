@@ -1,5 +1,5 @@
 cron:
 - description: Model Update Fetch
   url: /___fetch___
-  schedule: every 6 hours synchronized
+  schedule: every 6 hours from 00:01 to 23:59
   timezone: America/New_York
