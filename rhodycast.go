@@ -2,6 +2,7 @@ package rhodycast
 
 import (
 	"fmt"
+	"html/template"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -13,6 +14,8 @@ import (
 
 	"github.com/mpiannucci/surfnerd"
 )
+
+var indexTemplate = template.Must(template.ParseFiles("templates/base.html", "templates/index.html"))
 
 func init() {
 	http.HandleFunc("/", indexHandler)
@@ -28,7 +31,9 @@ func forecastKey(c context.Context) *datastore.Key {
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "Hello, world!")
+	if err := indexTemplate.Execute(w, nil); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }
 
 func waveWatchFetchHandler(w http.ResponseWriter, r *http.Request) {
