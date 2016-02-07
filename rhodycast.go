@@ -31,7 +31,23 @@ func forecastKey(c context.Context) *datastore.Key {
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
-	if err := indexTemplate.Execute(w, nil); err != nil {
+	ctx := appengine.NewContext(r)
+
+	// Query the current count of forecasts
+	q := datastore.NewQuery("Forecast")
+	var forecasts []surfnerd.WaveWatchForecast
+	_, keyError := q.GetAll(ctx, &forecasts)
+	if keyError != nil {
+		http.Error(w, keyError.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if len(forecasts) < 1 {
+		http.Error(w, "No forecasts available", http.StatusInternalServerError)
+		return
+	}
+
+	if err := indexTemplate.Execute(w, forecasts[0]); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }

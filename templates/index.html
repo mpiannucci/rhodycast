@@ -1,3 +1,5 @@
 {{ define "content" }}
-    Hello World
+    {{ range .ForecastData }}
+        <p>{{ .Time }}</p>
+    {{ end }}
 {{ end }}
