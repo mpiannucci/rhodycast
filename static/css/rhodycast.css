@@ -48,3 +48,7 @@ body {
 .table tbody>tr>td.vertical-align{
     vertical-align: middle;
 }
+
+.table tbody>tr>td.time-col{
+    width: 8%;
+}
