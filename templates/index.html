@@ -5,7 +5,7 @@
         <div class="col-lg-12">
             {{ range $index, $forecastItem := .ForecastData }}
                 {{ if eq $index 0 }}
-                    <h1>{{ $forecastItem.Date }}</h1>
+                    <h2>{{ $forecastItem.Date }}</h2>
                     <div class="table-responsive">
                         <table class="table table-hover">
                             <tr>
@@ -17,7 +17,7 @@
                                 <th>Secondary Swell Component</th>
                             </tr>
                 {{ else if eq $forecastItem.Time "00z" }}
-                    <h1>{{ $forecastItem.Date }}</h1>
+                    <h2>{{ $forecastItem.Date }}</h2>
                     <div class="table-responsive">
                         <table class="table table-hover">
                             <tr>
