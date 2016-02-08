@@ -17,11 +17,9 @@ import (
 )
 
 var funcMap = template.FuncMap{
-	"DegreeToDirection":     surfnerd.DegreeToDirection,
-	"MetersToFeet":          surfnerd.MetersToFeet,
-	"MetricSpeedToImperial": surfnerd.MetersPerSecondToMilesPerHour,
-	"ToTwelveHourFormat":    surfnerd.ToTwelveHourFormat,
-	"ToFixedPoint":          ToFixedPoint,
+	"DegreeToDirection":  surfnerd.DegreeToDirection,
+	"ToTwelveHourFormat": surfnerd.ToTwelveHourFormat,
+	"ToFixedPoint":       ToFixedPoint,
 }
 
 var indexTemplate = template.Must(template.New("base.html").Funcs(funcMap).ParseFiles("templates/base.html", "templates/index.html"))
@@ -109,6 +107,9 @@ func waveWatchFetchHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Error parsing wavewatch data", http.StatusInternalServerError)
 		return
 	}
+
+	// Convert to imperial
+	forecast.ConvertToImperialUnits()
 
 	// Query the current count of forecasts
 	q := datastore.NewQuery("Forecast")
