@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"html/template"
 	"io/ioutil"
+	"math"
 	"net/http"
 	"time"
 
@@ -15,7 +16,15 @@ import (
 	"github.com/mpiannucci/surfnerd"
 )
 
-var indexTemplate = template.Must(template.ParseFiles("templates/base.html", "templates/index.html"))
+var funcMap = template.FuncMap{
+	"DegreeToDirection":     surfnerd.DegreeToDirection,
+	"MetersToFeet":          surfnerd.MetersToFeet,
+	"MetricSpeedToImperial": surfnerd.MetersPerSecondToMilesPerHour,
+	"ToTwelveHourFormat":    surfnerd.ToTwelveHourFormat,
+	"ToFixedPoint":          ToFixedPoint,
+}
+
+var indexTemplate = template.Must(template.New("base.html").Funcs(funcMap).ParseFiles("templates/base.html", "templates/index.html"))
 
 func init() {
 	http.HandleFunc("/", indexHandler)
@@ -28,6 +37,15 @@ func init() {
 func forecastKey(c context.Context) *datastore.Key {
 	// The string "default_forecast" here could be varied to have multiple forecasts.
 	return datastore.NewKey(c, "Forecast", "default_forecast", 0, nil)
+}
+
+func round(num float64) int {
+	return int(num + math.Copysign(0.5, num))
+}
+
+func ToFixedPoint(num float64, precision int) float64 {
+	output := math.Pow(10, float64(precision))
+	return float64(round(num*output)) / output
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {

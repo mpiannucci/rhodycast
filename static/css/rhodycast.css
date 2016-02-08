@@ -41,3 +41,10 @@ body {
 .navbar .nav > li > a:active {
     color: #00399C;
 }
+
+/**
+ * Table formatting
+ */
+.table tbody>tr>td.vertical-align{
+    vertical-align: middle;
+}
