@@ -78,7 +78,7 @@ func waveWatchFetchHandler(w http.ResponseWriter, r *http.Request) {
 		Latitude:     41.296,
 		Longitude:    360 - 71.427,
 		Elevation:    0,
-		LocationName: "Block Island Buoy - 44097",
+		LocationName: "Block Island Sound",
 	}
 
 	// Create the model and get its url to fetch the latest data from
