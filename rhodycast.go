@@ -75,8 +75,8 @@ func waveWatchFetchHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Set the location to fetch from
 	riLocation := surfnerd.Location{
-		Latitude:     40.969,
-		Longitude:    360 - 71.127,
+		Latitude:     41.296,
+		Longitude:    360 - 71.427,
 		Elevation:    0,
 		LocationName: "Block Island Buoy - 44097",
 	}
