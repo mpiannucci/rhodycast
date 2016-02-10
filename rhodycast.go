@@ -108,6 +108,9 @@ func waveWatchFetchHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Find the breaking wave heights
+	forecast.FindBreakingWaveHeights(145.0, 30.0, 0.02)
+
 	// Convert to imperial
 	forecast.ConvertToImperialUnits()
 

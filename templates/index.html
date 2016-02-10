@@ -10,8 +10,9 @@
                         <table class="table table-hover">
                             <tr>
                                 <th class="time-col">Time</th>
-                                <th>Swell</th>
+                                <th>Wave Height</th>
                                 <th>Wind</th>
+                                <!-- <th>Swell</th> -->
                                 <th>Wind Swell Component</th>
                                 <th>Primary Swell Component</th>
                                 <th>Secondary Swell Component</th>
@@ -22,8 +23,9 @@
                         <table class="table table-hover">
                             <tr>
                                 <th class="time-col">Time</th>
-                                <th>Swell</th>
+                                <th>Wave Height</th>
                                 <th>Wind</th>
+                                <!-- <th>Swell</th> -->
                                 <th>Wind Swell Component</th>
                                 <th>Primary Swell Component</th>
                                 <th>Secondary Swell Component</th>
@@ -35,11 +37,14 @@
                         <h4>{{ ToTwelveHourFormat $forecastItem.Time }}</h4>
                     </td>
                     <td class="vertical-align">
-                        <h4>{{ ToFixedPoint $forecastItem.SignificantWaveHeight 2 }} ft @ {{ ToFixedPoint $forecastItem.MeanWavePeriod 2 }} s {{ ToFixedPoint $forecastItem.DominantWaveDirection 2 }}&deg;</h3>
+                        <h4>{{ ToFixedPoint $forecastItem.MinimumBreakingHeight 2 }} - {{ ToFixedPoint $forecastItem.MaximumBreakingHeight 2 }} ft</h4>
                     </td>
                     <td class="vertical-align">
                         <h4>{{ ToFixedPoint $forecastItem.SurfaceWindDirection 2 }}&deg; {{ ToFixedPoint $forecastItem.SurfaceWindSpeed 2 }} mph</h4>
                     </td>
+<!--                     <td class="vertical-align">
+                        {{ ToFixedPoint $forecastItem.SignificantWaveHeight 2 }} ft @ {{ ToFixedPoint $forecastItem.MeanWavePeriod 2 }} s {{ ToFixedPoint $forecastItem.DominantWaveDirection 2 }}&deg;
+                    </td> -->
                     <td class="vertical-align">
                         {{ if lt $forecastItem.WindSwellWaveHeight 1000.0 }}
                             {{ ToFixedPoint $forecastItem.WindSwellWaveHeight 2 }} ft @ {{ ToFixedPoint $forecastItem.WindSwellPeriod 2 }} s {{ ToFixedPoint $forecastItem.WindSwellDirection 2 }}&deg;
