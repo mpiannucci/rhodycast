@@ -13,9 +13,9 @@
                                 <th>Wave Height</th>
                                 <th>Wind</th>
                                 <!-- <th>Swell</th> -->
-                                <th>Wind Swell Component</th>
                                 <th>Primary Swell Component</th>
                                 <th>Secondary Swell Component</th>
+                                <th>Wind Swell Component</th>
                             </tr>
                 {{ else if eq $forecastItem.Time "00z" }}
                     <h2>{{ $forecastItem.Date }}</h2>
@@ -26,9 +26,9 @@
                                 <th>Wave Height</th>
                                 <th>Wind</th>
                                 <!-- <th>Swell</th> -->
-                                <th>Wind Swell Component</th>
                                 <th>Primary Swell Component</th>
                                 <th>Secondary Swell Component</th>
+                                <th>Wind Swell Component</th>
                             </tr>
                 {{ end }}
 
@@ -46,13 +46,6 @@
                         {{ ToFixedPoint $forecastItem.SignificantWaveHeight 2 }} ft @ {{ ToFixedPoint $forecastItem.MeanWavePeriod 2 }} s {{ ToFixedPoint $forecastItem.DominantWaveDirection 2 }}&deg;
                     </td> -->
                     <td class="vertical-align">
-                        {{ if lt $forecastItem.WindSwellWaveHeight 1000.0 }}
-                            {{ ToFixedPoint $forecastItem.WindSwellWaveHeight 2 }} ft @ {{ ToFixedPoint $forecastItem.WindSwellPeriod 2 }} s {{ ToFixedPoint $forecastItem.WindSwellDirection 2 }}&deg;
-                        {{ else }}
-                            No Wind Swell Data
-                        {{ end }}
-                    </td>
-                    <td class="vertical-align">
                         {{ if lt $forecastItem.PrimarySwellWaveHeight 1000.0 }}
                             {{ ToFixedPoint $forecastItem.PrimarySwellWaveHeight 2 }} ft @ {{ ToFixedPoint $forecastItem.PrimarySwellPeriod 2 }} s {{ ToFixedPoint $forecastItem.PrimarySwellDirection 2 }}&deg;
                         {{ else }}
@@ -64,6 +57,13 @@
                             {{ ToFixedPoint $forecastItem.SecondarySwellWaveHeight 2 }} ft @ {{ ToFixedPoint $forecastItem.SecondarySwellPeriod 2 }} s {{ ToFixedPoint $forecastItem.SecondarySwellDirection 2 }}&deg;
                         {{ else }}
                             No Secondary Swell Data
+                        {{ end }}
+                    </td>
+                    <td class="vertical-align">
+                        {{ if lt $forecastItem.WindSwellWaveHeight 1000.0 }}
+                            {{ ToFixedPoint $forecastItem.WindSwellWaveHeight 2 }} ft @ {{ ToFixedPoint $forecastItem.WindSwellPeriod 2 }} s {{ ToFixedPoint $forecastItem.WindSwellDirection 2 }}&deg;
+                        {{ else }}
+                            No Wind Swell Data
                         {{ end }}
                     </td>
                 </tr>
