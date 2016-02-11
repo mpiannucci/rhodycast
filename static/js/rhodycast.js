@@ -18,7 +18,7 @@ function initMap() {
 $(document).ready(function() {
     // Setup the chart!
     var chart = new CanvasJS.Chart('waveHeightChart', {
-        title:{
+        title: {
             text: "Wave Height (ft)",
             verticalAlign: "top", // "top", "center", "bottom"
             horizontalAlign: "center", // "left", "right", "center"
@@ -26,9 +26,15 @@ $(document).ready(function() {
             margin: -15,
             fontWeight: "bolder"
         },
-        axisY:{
+        axisY: {
             gridColor: "white",
+            lineColor: "#F2F2F2",
+            tickColor: "#F2F2F2",
             gridThickness: 0           
+        },
+        axisX: {
+            lineColor: "#F2F2F2",
+            tickColor: "#F2F2F2"
         },
         data: [
         {        

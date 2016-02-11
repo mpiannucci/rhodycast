@@ -2,19 +2,24 @@
 
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDpn6WRpxlXXEGijPqbk-eVaRe08_hvvHg&callback=initMap"async defer></script>
 
-<div class="container">
+<div class="container-fluid">
     <div class="row">
-        <div class="col-lg-12">
-            <h1>Rhode Island</h1>
-            <h4>NOAA WaveWatch III: {{ .ModelDescription }}</h4>
-            <h5>{{ .ModelRun }}</h5>
-            <h5>Coordinates: {{ ToFixedPoint .AdjustedLatitude 2 }}&deg; N, {{ ToFixedPoint .AdjustedLongitude 2 }}&deg; E</h5>
-        </div>
-        <div class="col-lg-12">
-            <div id="waveHeightChart">
+        <div class="col-lg-12 header-row">
+            <div class="container">
+                <h1>Rhode Island</h1>
+                <h4>NOAA WaveWatch III: {{ .ModelDescription }}</h4>
+                <h5>{{ .ModelRun }}</h5>
+                <h5>Coordinates: {{ ToFixedPoint .AdjustedLatitude 2 }}&deg; N, {{ ToFixedPoint .AdjustedLongitude 2 }}&deg; E</h5>
             </div>
         </div>
         <div class="col-lg-12">
+            <div class="container">
+                <div id="waveHeightChart">
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-12">
+            <div class="container">
             {{ range $index, $forecastItem := .ForecastData }}
                 {{ if eq $index 0 }}
                     <h2>{{ $forecastItem.Date }}</h2>
@@ -85,6 +90,7 @@
                     </div>
                 {{ end }}
             {{ end }}
+            </div>
         </div>
     </div>
 </div>

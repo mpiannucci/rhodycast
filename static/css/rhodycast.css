@@ -67,3 +67,11 @@ body {
     height: 30vh;
     margin-top: 20px;
 }
+
+/** 
+ * Location Header row
+ */
+.header-row {
+    background-color: #F2F2F2;
+    margin-bottom: 10px;
+}
