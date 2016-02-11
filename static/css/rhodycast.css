@@ -54,6 +54,21 @@ body {
 }
 
 /**
+ * Beta tag
+ */
+#betaTag {
+    background-color: #FFFFFF;
+    color: #0D9EFF;
+    border-radius: 5px;
+    font-size: 15px;
+    padding: 3px;
+}
+
+#betaTag li > a:hover, a:hover span {
+    background-color: #00399C !important;
+}
+
+/**
  * Google Maps
  */
 #map {
