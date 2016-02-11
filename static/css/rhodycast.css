@@ -52,3 +52,10 @@ body {
 .table tbody>tr>td.time-col{
     width: 8%;
 }
+
+/**
+ * Google Maps
+ */
+#map {
+    height: 30vh;
+}

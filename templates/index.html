@@ -1,7 +1,15 @@
 {{ define "content" }}
 
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDpn6WRpxlXXEGijPqbk-eVaRe08_hvvHg&callback=initMap"async defer></script>
+
 <div class="container">
     <div class="row">
+        <div class="col-lg-12">
+            <h1>Rhode Island</h1>
+            <h4>NOAA WaveWatch III: {{ .ModelDescription }}</h4>
+            <h4>{{ .ModelRun }}</h4>
+            <h4>Coordinates: {{ .AdjustedLatitude }} {{ .AdjustedLongitude }}</h4>
+        </div>
         <div class="col-lg-12">
             {{ range $index, $forecastItem := .ForecastData }}
                 {{ if eq $index 0 }}
