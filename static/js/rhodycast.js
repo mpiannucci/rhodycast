@@ -24,9 +24,9 @@ $(document).ready(function() {
 
         dataSeries = [];
         for (var i = 0; i < data.ForecastData.length; i++) {
-            var waveHeightRange = Math.round(data.ForecastData[i].MinimumBreakingHeight * 100) / 100 + " - " + Math.round(data.ForecastData[i].MaximumBreakingHeight * 100) / 100 + " ft";
-            var swell = Math.round(data.ForecastData[i].SignificantWaveHeight * 100) / 100 + " @ " + Math.round(data.ForecastData[i].MeanWavePeriod * 100) / 100 + " s " + Math.round(data.ForecastData[i].DominantWaveDirection * 100) / 100 + "\xB0";
-            var wind  = Math.round(data.ForecastData[i].SurfaceWindDirection * 100) / 100 + "\xB0 " + Math.round(data.ForecastData[i].SurfaceWindSpeed * 100) / 100 + " mph";
+            var waveHeightRange = roundHundreths(data.ForecastData[i].MinimumBreakingHeight) + " - " + roundHundreths(data.ForecastData[i].MaximumBreakingHeight) + " ft";
+            var swell = roundHundreths(data.ForecastData[i].SignificantWaveHeight) + " @ " + roundHundreths(data.ForecastData[i].MeanWavePeriod) + " s " + roundHundreths(data.ForecastData[i].DominantWaveDirection) + "\xB0";
+            var wind  = roundHundreths(data.ForecastData[i].SurfaceWindDirection) + "\xB0 " + roundHundreths(data.ForecastData[i].SurfaceWindSpeed) + " mph";
 
             dataPoint = {
                 y: Math.round(data.ForecastData[i].MaximumBreakingHeight * 100) / 100,
@@ -70,3 +70,7 @@ $(document).ready(function() {
         chart.render();
     });
 });
+
+function roundHundreths(original) {
+    return Math.round(original * 100.0) / 100.0;
+}
