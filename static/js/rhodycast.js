@@ -19,10 +19,16 @@ $(document).ready(function() {
     // Setup the chart!
     var chart = new CanvasJS.Chart('waveHeightChart', {
         title:{
-            text: "Wave Height (ft)"
+            text: "Wave Height (ft)",
+            verticalAlign: "top", // "top", "center", "bottom"
+            horizontalAlign: "center", // "left", "right", "center"
+            fontSize: 15,
+            margin: -15,
+            fontWeight: "bolder"
         },
         axisY:{
-            gridColor: "white"
+            gridColor: "white",
+            gridThickness: 0           
         },
         data: [
         {        
