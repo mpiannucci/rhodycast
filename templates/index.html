@@ -7,8 +7,12 @@
         <div class="col-lg-12">
             <h1>Rhode Island</h1>
             <h4>NOAA WaveWatch III: {{ .ModelDescription }}</h4>
-            <h4>{{ .ModelRun }}</h4>
-            <h4>Coordinates: {{ .AdjustedLatitude }} {{ .AdjustedLongitude }}</h4>
+            <h5>{{ .ModelRun }}</h5>
+            <h5>Coordinates: {{ ToFixedPoint .AdjustedLatitude 2 }}&deg; N, {{ ToFixedPoint .AdjustedLongitude 2 }}&deg; E</h5>
+        </div>
+        <div class="col-lg-12">
+            <div id="waveHeightChart">
+            </div>
         </div>
         <div class="col-lg-12">
             {{ range $index, $forecastItem := .ForecastData }}
