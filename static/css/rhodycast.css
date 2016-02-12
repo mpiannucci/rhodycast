@@ -69,13 +69,6 @@ body {
 }
 
 /**
- * Google Maps
- */
-#map {
-    height: 30vh;
-}
-
-/**
  * Charts
  */
 #waveHeightChart {
