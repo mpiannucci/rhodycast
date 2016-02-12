@@ -51,6 +51,15 @@ $(document).ready(function() {
                 day = data.ForecastData[nextStartValue].Date.split(" ")[0];
             }
 
+            var labelSize = 12
+            var width = (window.innerWidth > 0) ? window.innerWidth : screen.width;
+            if ((width < 600) && (width > 400)) {
+                day = day.substring(0,3);
+            } else if (width <= 400) {
+                day = day.substring(0,3);
+                labelSize = 10;
+            }
+
             stripLine = {
                 startValue: nextStartValue,
                 endValue: nextStartValue + splitLength,
@@ -58,7 +67,7 @@ $(document).ready(function() {
                 label: day,
                 labelBackgroundColor: "#FFFFFF",
                 labelFontColor: "#838383",
-                labelFontSize: 12
+                labelFontSize: labelSize
             }
 
             if (firstFlag && (splitStartIndex == 0)) {
