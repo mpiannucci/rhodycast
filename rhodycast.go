@@ -26,15 +26,14 @@ var indexTemplate = template.Must(template.New("base.html").Funcs(funcMap).Parse
 
 func init() {
 	http.HandleFunc("/", indexHandler)
-	http.HandleFunc("/___fetch___", waveWatchFetchHandler)
+	http.HandleFunc("/___fetch___", modelFetchHandler)
 	http.HandleFunc("/forecast_as_json", forecastJsonHandler)
-	http.HandleFunc("/modeldata_as_json", modelDataJsonHandler)
 }
 
 // forecastKey returns the key used for all forecast entries.
 func forecastKey(c context.Context) *datastore.Key {
 	// The string "default_forecast" here could be varied to have multiple forecasts.
-	return datastore.NewKey(c, "Forecast", "default_forecast", 0, nil)
+	return datastore.NewKey(c, "SurfForecast", "default_forecast", 0, nil)
 }
 
 func round(num float64) int {
@@ -46,12 +45,129 @@ func ToFixedPoint(num float64, precision int) float64 {
 	return float64(round(num*output)) / output
 }
 
+func fetchWaveForecast(loc surfnerd.Location, client *http.Client, w http.ResponseWriter) *surfnerd.WaveForecast {
+	waveModel := surfnerd.GetWaveModelForLocation(loc)
+	waveURL := waveModel.CreateURL(loc, 0, 60)
+
+	// Fetch the wave data!
+	waveResp, waveHttpErr := client.Get(waveURL)
+	if waveHttpErr != nil {
+		http.Error(w, waveHttpErr.Error(), http.StatusInternalServerError)
+		return nil
+	}
+	fmt.Fprintf(w, "HTTP GET returned status %v\n", waveResp.Status)
+	defer waveResp.Body.Close()
+
+	// Read all of the raw data
+	waveContents, waveReadErr := ioutil.ReadAll(waveResp.Body)
+	if waveReadErr != nil {
+		http.Error(w, waveReadErr.Error(), http.StatusInternalServerError)
+		return nil
+	}
+
+	// Put the forecast data into containers
+	waveModelData := surfnerd.WaveModelDataFromRaw(loc, waveContents)
+	waveForecast := surfnerd.WaveForecastFromModelData(waveModelData)
+	if waveForecast == nil {
+		http.Error(w, "Error parsing wavewatch data", http.StatusInternalServerError)
+		return nil
+	}
+
+	return waveForecast
+}
+
+func fetchWindForecast(loc surfnerd.Location, client *http.Client, w http.ResponseWriter) *surfnerd.WindForecast {
+	windModel := surfnerd.GetWindModelForLocation(loc)
+	windURL := windModel.CreateURL(loc, 0, 60)
+
+	// Fetch the wind data
+	windResp, windHttpErr := client.Get(windURL)
+	if windHttpErr != nil {
+		http.Error(w, windHttpErr.Error(), http.StatusInternalServerError)
+		return nil
+	}
+	fmt.Fprintf(w, "HTTP GET returned status %v\n", windResp.Status)
+	defer windResp.Body.Close()
+
+	// Read all of the raw data
+	windContents, windReadErr := ioutil.ReadAll(windResp.Body)
+	if windReadErr != nil {
+		http.Error(w, windReadErr.Error(), http.StatusInternalServerError)
+		return nil
+	}
+
+	// Put the forecast data into containers
+	windModelData := surfnerd.WindModelDataFromRaw(loc, windContents)
+	windForecast := surfnerd.WindForecastFromModelData(windModelData)
+	if windForecast == nil {
+		http.Error(w, "Error parsing wavewatch data", http.StatusInternalServerError)
+		return nil
+	}
+
+	return windForecast
+}
+
+func modelFetchHandler(w http.ResponseWriter, r *http.Request) {
+	ctxParent := appengine.NewContext(r)
+	ctx, _ := context.WithTimeout(ctxParent, 60*time.Second)
+	client := urlfetch.Client(ctx)
+
+	// Set the location to fetch from
+	riWaveLocation := surfnerd.Location{
+		Latitude:     41.323,
+		Longitude:    360 - 71.396,
+		Elevation:    30.0,
+		LocationName: "Block Island Sound",
+	}
+	riWindLocation := surfnerd.Location{
+		Latitude:     41.6,
+		Longitude:    360 - 71.500,
+		Elevation:    10,
+		LocationName: "Narragansett Pier",
+	}
+	riForecastLocation := surfnerd.Location{
+		Latitude:     42.395,
+		Longitude:    -71.453,
+		LocationName: "Narragansett",
+	}
+
+	waveForecast := fetchWaveForecast(riWaveLocation, client, w)
+	windForecast := fetchWindForecast(riWindLocation, client, w)
+	surfForecast := surfnerd.NewSurfForecast(riForecastLocation, 145.0, 0.02, waveForecast, windForecast)
+
+	// Query the current count of forecasts
+	q := datastore.NewQuery("SurfForecast")
+	entryCount, countError := q.Count(ctxParent)
+	if countError != nil {
+		http.Error(w, countError.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// If there is an entity then swap it out with the new one. Otherwise make a
+	// new one
+	if entryCount > 0 {
+		var forecasts []surfnerd.SurfForecast
+		keys, keyError := q.GetAll(ctxParent, &forecasts)
+		if keyError != nil {
+			http.Error(w, keyError.Error(), http.StatusInternalServerError)
+		}
+		datastore.Put(ctxParent, keys[0], surfForecast)
+	} else {
+		// Get the datastore key from the default forecast entry
+		key := datastore.NewIncompleteKey(ctxParent, "SurfForecast", forecastKey(ctxParent))
+		if _, putErr := datastore.Put(ctxParent, key, surfForecast); putErr != nil {
+			http.Error(w, putErr.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+}
+
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := appengine.NewContext(r)
 
 	// Query the current count of forecasts
-	q := datastore.NewQuery("Forecast")
-	var forecasts []surfnerd.WaveWatchForecast
+	q := datastore.NewQuery("SurfForecast")
+	var forecasts []surfnerd.SurfForecast
 	_, keyError := q.GetAll(ctx, &forecasts)
 	if keyError != nil {
 		http.Error(w, keyError.Error(), http.StatusInternalServerError)
@@ -68,85 +184,12 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func waveWatchFetchHandler(w http.ResponseWriter, r *http.Request) {
-	ctxParent := appengine.NewContext(r)
-	ctx, _ := context.WithTimeout(ctxParent, 60*time.Second)
-	client := urlfetch.Client(ctx)
-
-	// Set the location to fetch from
-	riLocation := surfnerd.Location{
-		Latitude:     41.323,
-		Longitude:    360 - 71.396,
-		Elevation:    0,
-		LocationName: "Block Island Sound",
-	}
-
-	// Create the model and get its url to fetch the latest data from
-	wwModel := surfnerd.GetWaveModelForLocation(riLocation)
-	wwURL := wwModel.CreateURL(riLocation, 0, 60)
-
-	resp, httpErr := client.Get(wwURL)
-	if httpErr != nil {
-		http.Error(w, httpErr.Error(), http.StatusInternalServerError)
-		return
-	}
-	fmt.Fprintf(w, "HTTP GET returned status %v\n", resp.Status)
-	defer resp.Body.Close()
-
-	// Read all of the raw data
-	contents, readErr := ioutil.ReadAll(resp.Body)
-	if readErr != nil {
-		http.Error(w, readErr.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// Put the forecast data into containers
-	modelData := surfnerd.WaveWaveModelDataFromRaw(riLocation, contents)
-	forecast := surfnerd.WaveWatchForecastFromModelData(modelData)
-	if forecast == nil {
-		http.Error(w, "Error parsing wavewatch data", http.StatusInternalServerError)
-		return
-	}
-
-	// Find the breaking wave heights
-	forecast.FindBreakingWaveHeights(145.0, 30.0, 0.02)
-
-	// Convert to imperial
-	forecast.ConvertToImperialUnits()
-
-	// Query the current count of forecasts
-	q := datastore.NewQuery("Forecast")
-	entryCount, countError := q.Count(ctxParent)
-	if countError != nil {
-		http.Error(w, countError.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// If there is an entity then swap it out with the new one. Otherwise make a
-	// new one
-	if entryCount > 0 {
-		var forecasts []surfnerd.WaveWatchForecast
-		keys, keyError := q.GetAll(ctxParent, &forecasts)
-		if keyError != nil {
-			http.Error(w, keyError.Error(), http.StatusInternalServerError)
-		}
-		datastore.Put(ctxParent, keys[0], forecast)
-	} else {
-		// Get the datastore key from the default forecast entry
-		key := datastore.NewIncompleteKey(ctxParent, "Forecast", forecastKey(ctxParent))
-		if _, putErr := datastore.Put(ctxParent, key, forecast); putErr != nil {
-			http.Error(w, putErr.Error(), http.StatusInternalServerError)
-			return
-		}
-	}
-}
-
 func forecastJsonHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := appengine.NewContext(r)
 
 	// Query the current count of forecasts
-	q := datastore.NewQuery("Forecast")
-	var forecasts []surfnerd.WaveWatchForecast
+	q := datastore.NewQuery("SurfForecast")
+	var forecasts []surfnerd.SurfForecast
 	_, keyError := q.GetAll(ctx, &forecasts)
 	if keyError != nil {
 		http.Error(w, keyError.Error(), http.StatusInternalServerError)
@@ -167,33 +210,4 @@ func forecastJsonHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(forecastJson)
-}
-
-func modelDataJsonHandler(w http.ResponseWriter, r *http.Request) {
-	ctx := appengine.NewContext(r)
-
-	// Query the current count of forecasts
-	q := datastore.NewQuery("Forecast")
-	var forecasts []surfnerd.WaveWatchForecast
-	_, keyError := q.GetAll(ctx, &forecasts)
-	if keyError != nil {
-		http.Error(w, keyError.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	if len(forecasts) < 1 {
-		http.Error(w, "No forecasts available", http.StatusInternalServerError)
-		return
-	}
-
-	forecast := forecasts[0]
-	modelData := forecast.ToModelData()
-	modelDataJson, jsonErr := modelData.ToJSON()
-	if jsonErr != nil {
-		http.Error(w, "Could not marshal ModelData to json", http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(modelDataJson)
 }
