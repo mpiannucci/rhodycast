@@ -44,6 +44,7 @@ $(document).ready(function() {
                         labelFontColor: "#838383",
                         labelFontSize: labelSize
                     }
+                    stripLines.push(stripLine);
                 }
             } else {
                 if ((data.ForecastData[i].Time === "07 PM") || (data.ForecastData[i].Time === "08 PM")) {
