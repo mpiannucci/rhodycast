@@ -134,6 +134,7 @@ func modelFetchHandler(w http.ResponseWriter, r *http.Request) {
 	waveForecast := fetchWaveForecast(riWaveLocation, client, w)
 	windForecast := fetchWindForecast(riWindLocation, client, w)
 	surfForecast := surfnerd.NewSurfForecast(riForecastLocation, 145.0, 0.02, waveForecast, windForecast)
+	surfForecast.ConvertToImperialUnits()
 
 	// Query the current count of forecasts
 	q := datastore.NewQuery("SurfForecast")

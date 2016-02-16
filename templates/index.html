@@ -5,8 +5,8 @@
         <div class="col-lg-12 header-row">
             <div class="container">
                 <h1>Rhode Island</h1>
-                <h4>NOAA WaveWatch III: {{ .ModelDescription }}</h4>
-                <h5>{{ .ModelRun }}</h5>
+                <h4>NOAA WaveWatch III: {{ .WaveModel.Description }}</h4>
+                <h5>{{ .WaveModel.ModelRun }}</h5>
                 <h5>Location: <a href="http://google.com/maps/place/{{ ToFixedPoint .AdjustedLatitude 5 }},{{ ToFixedPoint .AdjustedLongitude 5 }}/@{{ ToFixedPoint .AdjustedLatitude 5 }},{{ ToFixedPoint .AdjustedLongitude 5 }},13z">{{ .LocationName }} ({{ ToFixedPoint .AdjustedLatitude 2 }}&deg; N, {{ ToFixedPoint .AdjustedLongitude 2 }}&deg; E)</a></h5>
             </div>
         </div>
@@ -27,12 +27,11 @@
                                 <th class="time-col">Time</th>
                                 <th>Wave Height</th>
                                 <th>Wind</th>
-                                <!-- <th>Swell</th> -->
                                 <th>Primary Swell Component</th>
                                 <th>Secondary Swell Component</th>
                                 <th>Wind Swell Component</th>
                             </tr>
-                {{ else if eq $forecastItem.Time "00z" }}
+                {{ else if eq $forecastItem.Time "01 AM" }}
                     <h2>{{ $forecastItem.Date }}</h2>
                     <div class="table-responsive">
                         <table class="table table-hover">
@@ -40,7 +39,18 @@
                                 <th class="time-col">Time</th>
                                 <th>Wave Height</th>
                                 <th>Wind</th>
-                                <!-- <th>Swell</th> -->
+                                <th>Primary Swell Component</th>
+                                <th>Secondary Swell Component</th>
+                                <th>Wind Swell Component</th>
+                            </tr>
+                {{ else if eq $forecastItem.Time "02 AM" }}
+                    <h2>{{ $forecastItem.Date }}</h2>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <tr>
+                                <th class="time-col">Time</th>
+                                <th>Wave Height</th>
+                                <th>Wind</th>
                                 <th>Primary Swell Component</th>
                                 <th>Secondary Swell Component</th>
                                 <th>Wind Swell Component</th>
@@ -49,41 +59,41 @@
 
                 <tr>
                     <td class="vertical-align time-col">
-                        <h4>{{ ToTwelveHourFormat $forecastItem.Time }}</h4>
+                        <h4>{{ $forecastItem.Time }}</h4>
                     </td>
                     <td class="vertical-align">
                         <h4>{{ ToFixedPoint $forecastItem.MinimumBreakingHeight 2 }} - {{ ToFixedPoint $forecastItem.MaximumBreakingHeight 2 }} ft</h4>
                     </td>
                     <td class="vertical-align">
-                        <h4>{{ ToFixedPoint $forecastItem.SurfaceWindDirection 2 }}&deg; {{ ToFixedPoint $forecastItem.SurfaceWindSpeed 2 }} mph</h4>
-                    </td>
-<!--                     <td class="vertical-align">
-                        {{ ToFixedPoint $forecastItem.SignificantWaveHeight 2 }} ft @ {{ ToFixedPoint $forecastItem.MeanWavePeriod 2 }} s {{ ToFixedPoint $forecastItem.DominantWaveDirection 2 }}&deg;
-                    </td> -->
+                        <h4>{{ $forecastItem.WindCompassDirection }} {{ ToFixedPoint $forecastItem.WindSpeed 2 }} mph</h4>
+                    </td> 
                     <td class="vertical-align">
-                        {{ if lt $forecastItem.PrimarySwellWaveHeight 1000.0 }}
-                            {{ ToFixedPoint $forecastItem.PrimarySwellWaveHeight 2 }} ft @ {{ ToFixedPoint $forecastItem.PrimarySwellPeriod 2 }} s {{ ToFixedPoint $forecastItem.PrimarySwellDirection 2 }}&deg;
+                        {{ if $forecastItem.PrimarySwellComponent.IsValid }}
+                            {{ ToFixedPoint $forecastItem.PrimarySwellComponent.WaveHeight 2 }} ft @ {{ ToFixedPoint $forecastItem.PrimarySwellComponent.Period 2 }} s {{ ToFixedPoint $forecastItem.PrimarySwellComponent.Direction 2 }}&deg;
                         {{ else }}
                             No Primary Swell Data
                         {{ end }}
                     </td>
                     <td class="vertical-align">
-                        {{ if lt $forecastItem.SecondarySwellWaveHeight 1000.0 }}
-                            {{ ToFixedPoint $forecastItem.SecondarySwellWaveHeight 2 }} ft @ {{ ToFixedPoint $forecastItem.SecondarySwellPeriod 2 }} s {{ ToFixedPoint $forecastItem.SecondarySwellDirection 2 }}&deg;
+                        {{ if $forecastItem.SecondarySwellComponent.IsValid }}
+                            {{ ToFixedPoint $forecastItem.SecondarySwellComponent.WaveHeight 2 }} ft @ {{ ToFixedPoint $forecastItem.SecondarySwellComponent.Period 2 }} s {{ ToFixedPoint $forecastItem.SecondarySwellComponent.Direction 2 }}&deg;
                         {{ else }}
                             No Secondary Swell Data
                         {{ end }}
                     </td>
                     <td class="vertical-align">
-                        {{ if lt $forecastItem.WindSwellWaveHeight 1000.0 }}
-                            {{ ToFixedPoint $forecastItem.WindSwellWaveHeight 2 }} ft @ {{ ToFixedPoint $forecastItem.WindSwellPeriod 2 }} s {{ ToFixedPoint $forecastItem.WindSwellDirection 2 }}&deg;
+                        {{ if $forecastItem.TertiarySwellComponent.IsValid }}
+                            {{ ToFixedPoint $forecastItem.TertiarySwellComponent.WaveHeight 2 }} ft @ {{ ToFixedPoint $forecastItem.TertiarySwellComponent.Period 2 }} s {{ ToFixedPoint $forecastItem.TertiarySwellComponent.Direction 2 }}&deg;
                         {{ else }}
                             No Wind Swell Data
                         {{ end }}
                     </td>
                 </tr>
 
-                {{ if eq $forecastItem.Time "21z" }}
+                {{ if eq $forecastItem.Time "10 PM" }}
+                        </table>
+                    </div>
+                {{ else if eq $forecastItem.Time "11 PM" }}
                         </table>
                     </div>
                 {{ end }}
