@@ -66,7 +66,7 @@ func fetchWaveForecast(loc surfnerd.Location, client *http.Client, w http.Respon
 	}
 
 	// Put the forecast data into containers
-	waveModelData := surfnerd.WaveModelDataFromRaw(loc, waveContents)
+	waveModelData := surfnerd.WaveModelDataFromRaw(loc, waveModel.NOAAModel, waveContents)
 	waveForecast := surfnerd.WaveForecastFromModelData(waveModelData)
 	if waveForecast == nil {
 		http.Error(w, "Error parsing wavewatch data", http.StatusInternalServerError)
@@ -97,7 +97,7 @@ func fetchWindForecast(loc surfnerd.Location, client *http.Client, w http.Respon
 	}
 
 	// Put the forecast data into containers
-	windModelData := surfnerd.WindModelDataFromRaw(loc, windContents)
+	windModelData := surfnerd.WindModelDataFromRaw(loc, windModel.NOAAModel, windContents)
 	windForecast := surfnerd.WindForecastFromModelData(windModelData)
 	if windForecast == nil {
 		http.Error(w, "Error parsing wavewatch data", http.StatusInternalServerError)
