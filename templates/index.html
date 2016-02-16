@@ -5,7 +5,7 @@
         <div class="col-lg-12 header-row">
             <div class="container">
                 <h1>Rhode Island</h1>
-                <h4>NOAA WaveWatch III: {{ .WaveModel.Description }}</h4>
+                <h5>NOAA WaveWatch III: {{ .WaveModel.Description }}</h4>
                 <h5>{{ .WaveModel.ModelRun }}</h5>
                 <h5>Location: <a href="http://google.com/maps/place/{{ ToFixedPoint .AdjustedLatitude 5 }},{{ ToFixedPoint .AdjustedLongitude 5 }}/@{{ ToFixedPoint .AdjustedLatitude 5 }},{{ ToFixedPoint .AdjustedLongitude 5 }},13z">{{ .LocationName }} ({{ ToFixedPoint .AdjustedLatitude 2 }}&deg; N, {{ ToFixedPoint .AdjustedLongitude 2 }}&deg; E)</a></h5>
             </div>
@@ -53,7 +53,7 @@
                                 <th>Wind</th>
                                 <th>Primary Swell Component</th>
                                 <th>Secondary Swell Component</th>
-                                <th>Wind Swell Component</th>
+                                <th>Tertiary Swell Component</th>
                             </tr>
                 {{ end }}
 
@@ -71,21 +71,21 @@
                         {{ if $forecastItem.PrimarySwellComponent.IsValid }}
                             {{ ToFixedPoint $forecastItem.PrimarySwellComponent.WaveHeight 2 }} ft @ {{ ToFixedPoint $forecastItem.PrimarySwellComponent.Period 2 }} s {{ ToFixedPoint $forecastItem.PrimarySwellComponent.Direction 2 }}&deg;
                         {{ else }}
-                            No Primary Swell Data
+                            No Primary Swell Component
                         {{ end }}
                     </td>
                     <td class="vertical-align">
                         {{ if $forecastItem.SecondarySwellComponent.IsValid }}
                             {{ ToFixedPoint $forecastItem.SecondarySwellComponent.WaveHeight 2 }} ft @ {{ ToFixedPoint $forecastItem.SecondarySwellComponent.Period 2 }} s {{ ToFixedPoint $forecastItem.SecondarySwellComponent.Direction 2 }}&deg;
                         {{ else }}
-                            No Secondary Swell Data
+                            No Secondary Swell Component
                         {{ end }}
                     </td>
                     <td class="vertical-align">
                         {{ if $forecastItem.TertiarySwellComponent.IsValid }}
                             {{ ToFixedPoint $forecastItem.TertiarySwellComponent.WaveHeight 2 }} ft @ {{ ToFixedPoint $forecastItem.TertiarySwellComponent.Period 2 }} s {{ ToFixedPoint $forecastItem.TertiarySwellComponent.Direction 2 }}&deg;
                         {{ else }}
-                            No Wind Swell Data
+                            No Tertiary Swell Component
                         {{ end }}
                     </td>
                 </tr>

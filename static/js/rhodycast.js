@@ -5,82 +5,7 @@ $(document).ready(function() {
         type: 'GET'
     }).done(function(data) {
 
-        // Create some ranges so we can make the chart consistently colored
-        var firstTime = data.ForecastData[0].Time;
-        var splitStartIndex = 0;
-        var splitLength = 4;
-        var firstSplitLength = splitLength;
-        if ((firstTime === "01 AM") || (firstTime === "02 AM")){
-            // Defaults are good
-            splitStartIndex = 0;
-        } else if (firstTime === "12z") {
-            firstSplitLength = 2;
-        } else if (firstTime === "18z") {
-            splitStartIndex = 4;
-        } else if (firstTime === "00z") {
-            splitStartIndex = 2;
-        }
-
-        var stripLines = []
-        var nextStartValue = 0;
-        var firstFlag = true;
-        var dayIndex = 0;
-        while (nextStartValue < data.ForecastData.length) {
-            var day = " ";
-            if (firstFlag) {
-                day = data.ForecastData[splitStartIndex].Date.split(" ")[0];
-            } else {
-                day = data.ForecastData[nextStartValue].Date.split(" ")[0];
-            }
-
-            var labelSize = 12
-            var width = (window.innerWidth > 0) ? window.innerWidth : screen.width;
-            if ((width < 600) && (width > 400)) {
-                day = day.substring(0,3);
-            } else if (width <= 400) {
-                day = day.substring(0,3);
-                labelSize = 10;
-            }
-
-            stripLine = {
-                startValue: nextStartValue,
-                endValue: nextStartValue + splitLength,
-                color: "#FFFFFF",
-                label: day,
-                labelBackgroundColor: "#FFFFFF",
-                labelFontColor: "#838383",
-                labelFontSize: labelSize
-            }
-
-            if (firstFlag && (splitStartIndex == 0)) {
-                stripLine.startValue = splitStartIndex;
-                stripLine.endValue = splitStartIndex + firstSplitLength;
-                nextStartValue += firstSplitLength;
-                firstFlag = false;
-            } else {
-                nextStartValue += splitLength
-            }
-
-            stripLines.push(stripLine);
-
-            stripLineNegative = {
-                startValue: nextStartValue,
-                endValue: nextStartValue + splitLength,
-                color: "#F2F2F2",
-            }
-
-            if (firstFlag) {
-                stripLineNegative.startValue = 0;
-                stripLineNegative.endValue = splitStartIndex;
-                nextStartValue += splitStartIndex;
-                firstFlag = false;
-            } else {
-                nextStartValue += splitLength;
-            }
-
-            stripLines.push(stripLineNegative);
-        }
-
+        stripLines = [];
         dataSeries = [];
         for (var i = 0; i < data.ForecastData.length; i++) {
             var waveHeightRange = roundHundreths(data.ForecastData[i].MinimumBreakingHeight) + " - " + roundHundreths(data.ForecastData[i].MaximumBreakingHeight) + " ft";
@@ -90,6 +15,70 @@ $(document).ready(function() {
 
             xLabel = " ";
 
+            if (stripLines.length === 0) {
+                if ((data.ForecastData[i].Time === "07 PM") || (data.ForecastData[i].Time === "08 PM") ||
+                    (data.ForecastData[i].Time === "01 AM") || (data.ForecastData[i].Time === "02 AM")) {
+                    stripLineNegative = {
+                        startValue: i,
+                        endValue: 0,
+                        color: "#F2F2F2",
+                    }
+                    stripLines.push(stripLineNegative);
+                } else {
+                    var day = data.ForecastData[i].Date.split(" ")[0];
+                    var labelSize = 12
+                    var width = (window.innerWidth > 0) ? window.innerWidth : screen.width;
+                    if ((width < 600) && (width > 400)) {
+                        day = day.substring(0,3);
+                    } else if (width <= 400) {
+                        day = day.substring(0,3);
+                    labelSize = 10;
+                    }
+
+                    stripLine = {
+                        startValue: i,
+                        endValue: 0,
+                        color: "#FFFFFF",
+                        label: day,
+                        labelBackgroundColor: "#FFFFFF",
+                        labelFontColor: "#838383",
+                        labelFontSize: labelSize
+                    }
+                }
+            } else {
+                if ((data.ForecastData[i].Time === "07 PM") || (data.ForecastData[i].Time === "08 PM")) {
+                    stripLines[stripLines.length - 1].endValue = i;
+                    stripLineNegative = {
+                        startValue: i,
+                        endValue: 0,
+                        color: "#F2F2F2",
+                    }
+                    stripLines.push(stripLineNegative);
+                } else if ((data.ForecastData[i].Time === "04 AM") || (data.ForecastData[i].Time === "05 AM")) {
+                    stripLines[stripLines.length - 1].endValue = i;
+
+                    var day = data.ForecastData[i].Date.split(" ")[0];
+                    var labelSize = 12
+                    var width = (window.innerWidth > 0) ? window.innerWidth : screen.width;
+                    if ((width < 600) && (width > 400)) {
+                        day = day.substring(0,3);
+                    } else if (width <= 400) {
+                        day = day.substring(0,3);
+                        labelSize = 10;
+                    }
+                    stripLine = {
+                        startValue: i,
+                        endValue: 0,
+                        color: "#FFFFFF",
+                        label: day,
+                        labelBackgroundColor: "#FFFFFF",
+                        labelFontColor: "#838383",
+                        labelFontSize: labelSize
+                    }
+                    stripLines.push(stripLine);
+                }
+            }
+
             dataPoint = {
                 y: Math.round(data.ForecastData[i].MaximumBreakingHeight * 100) / 100,
                 x: i,
@@ -98,6 +87,8 @@ $(document).ready(function() {
             }
             dataSeries.push(dataPoint);
         }
+
+        stripLines[stripLines.length - 1].endValue = data.ForecastData.length;
 
         var chart = new CanvasJS.Chart('waveHeightChart', {
             title: {
@@ -120,8 +111,8 @@ $(document).ready(function() {
                 lineColor: "#F2F2F2",
                 tickColor: "#F2F2F2",
                 gridThickness: 0,
-                interval: 4,
-                stripLines: []
+                interval: 1,
+                stripLines: stripLines
             },
             data: [
             {        
