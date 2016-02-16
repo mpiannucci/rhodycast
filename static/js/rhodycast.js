@@ -6,87 +6,87 @@ $(document).ready(function() {
     }).done(function(data) {
 
         // Create some ranges so we can make the chart consistently colored
-        var rawDateArr = data.ModelRun.split(" ")
-        var firstTime = rawDateArr[rawDateArr.length - 1];
-        var splitStartIndex = 0;
-        var splitLength = 4;
-        var firstSplitLength = splitLength;
-        if (firstTime === "6z") {
-            // Defaults are good
-            splitStartIndex = 0;
-        } else if (firstTime === "12z") {
-            firstSplitLength = 2;
-        } else if (firstTime === "18z") {
-            splitStartIndex = 4;
-        } else if (firstTime === "00z") {
-            splitStartIndex = 2;
-        }
+        // var rawDateArr = data.ForecastData[0]..split(" ")
+        // var firstTime = rawDateArr[rawDateArr.length - 1];
+        // var splitStartIndex = 0;
+        // var splitLength = 4;
+        // var firstSplitLength = splitLength;
+        // if (firstTime === "6z") {
+        //     // Defaults are good
+        //     splitStartIndex = 0;
+        // } else if (firstTime === "12z") {
+        //     firstSplitLength = 2;
+        // } else if (firstTime === "18z") {
+        //     splitStartIndex = 4;
+        // } else if (firstTime === "00z") {
+        //     splitStartIndex = 2;
+        // }
 
-        var stripLines = []
-        var nextStartValue = 0;
-        var firstFlag = true;
-        var dayIndex = 0;
-        while (nextStartValue < data.ForecastData.length) {
-            var day = " ";
-            if (firstFlag) {
-                day = data.ForecastData[splitStartIndex].Date.split(" ")[0];
-            } else {
-                day = data.ForecastData[nextStartValue].Date.split(" ")[0];
-            }
+        // var stripLines = []
+        // var nextStartValue = 0;
+        // var firstFlag = true;
+        // var dayIndex = 0;
+        // while (nextStartValue < data.ForecastData.length) {
+        //     var day = " ";
+        //     if (firstFlag) {
+        //         day = data.ForecastData[splitStartIndex].Date.split(" ")[0];
+        //     } else {
+        //         day = data.ForecastData[nextStartValue].Date.split(" ")[0];
+        //     }
 
-            var labelSize = 12
-            var width = (window.innerWidth > 0) ? window.innerWidth : screen.width;
-            if ((width < 600) && (width > 400)) {
-                day = day.substring(0,3);
-            } else if (width <= 400) {
-                day = day.substring(0,3);
-                labelSize = 10;
-            }
+        //     var labelSize = 12
+        //     var width = (window.innerWidth > 0) ? window.innerWidth : screen.width;
+        //     if ((width < 600) && (width > 400)) {
+        //         day = day.substring(0,3);
+        //     } else if (width <= 400) {
+        //         day = day.substring(0,3);
+        //         labelSize = 10;
+        //     }
 
-            stripLine = {
-                startValue: nextStartValue,
-                endValue: nextStartValue + splitLength,
-                color: "#FFFFFF",
-                label: day,
-                labelBackgroundColor: "#FFFFFF",
-                labelFontColor: "#838383",
-                labelFontSize: labelSize
-            }
+        //     stripLine = {
+        //         startValue: nextStartValue,
+        //         endValue: nextStartValue + splitLength,
+        //         color: "#FFFFFF",
+        //         label: day,
+        //         labelBackgroundColor: "#FFFFFF",
+        //         labelFontColor: "#838383",
+        //         labelFontSize: labelSize
+        //     }
 
-            if (firstFlag && (splitStartIndex == 0)) {
-                stripLine.startValue = splitStartIndex;
-                stripLine.endValue = splitStartIndex + firstSplitLength;
-                nextStartValue += firstSplitLength;
-                firstFlag = false;
-            } else {
-                nextStartValue += splitLength
-            }
+        //     if (firstFlag && (splitStartIndex == 0)) {
+        //         stripLine.startValue = splitStartIndex;
+        //         stripLine.endValue = splitStartIndex + firstSplitLength;
+        //         nextStartValue += firstSplitLength;
+        //         firstFlag = false;
+        //     } else {
+        //         nextStartValue += splitLength
+        //     }
 
-            stripLines.push(stripLine);
+        //     stripLines.push(stripLine);
 
-            stripLineNegative = {
-                startValue: nextStartValue,
-                endValue: nextStartValue + splitLength,
-                color: "#F2F2F2",
-            }
+        //     stripLineNegative = {
+        //         startValue: nextStartValue,
+        //         endValue: nextStartValue + splitLength,
+        //         color: "#F2F2F2",
+        //     }
 
-            if (firstFlag) {
-                stripLineNegative.startValue = 0;
-                stripLineNegative.endValue = splitStartIndex;
-                nextStartValue += splitStartIndex;
-                firstFlag = false;
-            } else {
-                nextStartValue += splitLength;
-            }
+        //     if (firstFlag) {
+        //         stripLineNegative.startValue = 0;
+        //         stripLineNegative.endValue = splitStartIndex;
+        //         nextStartValue += splitStartIndex;
+        //         firstFlag = false;
+        //     } else {
+        //         nextStartValue += splitLength;
+        //     }
 
-            stripLines.push(stripLineNegative);
-        }
+        //     stripLines.push(stripLineNegative);
+        // }
 
         dataSeries = [];
         for (var i = 0; i < data.ForecastData.length; i++) {
             var waveHeightRange = roundHundreths(data.ForecastData[i].MinimumBreakingHeight) + " - " + roundHundreths(data.ForecastData[i].MaximumBreakingHeight) + " ft";
-            var swell = roundHundreths(data.ForecastData[i].SignificantWaveHeight) + " @ " + roundHundreths(data.ForecastData[i].MeanWavePeriod) + " s " + roundHundreths(data.ForecastData[i].DominantWaveDirection) + "\xB0";
-            var wind  = roundHundreths(data.ForecastData[i].SurfaceWindDirection) + "\xB0 " + roundHundreths(data.ForecastData[i].SurfaceWindSpeed) + " mph";
+            var swell = roundHundreths(data.ForecastData[i].PrimarySwellComponent.WaveHeight) + " @ " + roundHundreths(data.ForecastData[i].PrimarySwellComponent.Period) + " s " + roundHundreths(data.ForecastData[i].PrimarySwellComponent.Direction) + "\xB0";
+            var wind  = roundHundreths(data.ForecastData[i].WindDirection) + "\xB0 " + roundHundreths(data.ForecastData[i].WindSpeed) + " mph";
             var dateString = data.ForecastData[i].Date.split(" ")[0] + " " + data.ForecastData[i].Time;
 
             xLabel = " ";
@@ -122,7 +122,7 @@ $(document).ready(function() {
                 tickColor: "#F2F2F2",
                 gridThickness: 0,
                 interval: 4,
-                stripLines: stripLines
+                stripLines: []
             },
             data: [
             {        
