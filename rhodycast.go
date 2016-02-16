@@ -126,7 +126,7 @@ func modelFetchHandler(w http.ResponseWriter, r *http.Request) {
 		LocationName: "Narragansett Pier",
 	}
 	riForecastLocation := surfnerd.Location{
-		Latitude:     42.395,
+		Latitude:     41.395,
 		Longitude:    -71.453,
 		LocationName: "Narragansett",
 	}
