@@ -1,0 +1,32 @@
+{{ define "content" }}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-12 header-row">
+            <div class="container">
+                <h1>About RhodyCast</h1>
+                <h4>A simple Rhode Island surf forecast
+            </div>
+        </div>
+        <div class="col-lg-12">
+            <div class="container">
+                <h2>What is it?</h1>
+                <p>It's a simple wave forecast for the Rhode Island coast based on <a href="http://polar.ncep.noaa.gov/waves/index2.shtml">NOAA's WaveWatch III</a> multi-grid wave model.</p>
+                <h2>Why not just use MagicSeaweed, SwellInfo, or Surfline?</h2>
+                <p>Those are all great sites, but they are not focused on Rhode Island. Nor are they checking the accuracy of the forecast by surfing here or checking the waves here, so they leave a little to be desired for a wave nerd like me. This forecast aims to make the swell data easily available and free, so a user can understand exactly what spots to check.</p>
+                <h2>How does it work?</h2>
+                <p>Every 6 hours the NOAA models are updated. RhodyCast automatically grabs the latest data when it is available and solves for the breaking wave heights for a generalized beach on the Rhode Island Coast. Because of the nearshore resolution of WaveWatch, it avoids using an overly complicated propogration model. The website uses a library called <a href="https://github.com/mpiannucci/surfnerd">surfnerd</a> written in <a href="https://golang.org">Go</a> to do all of its wave model and wind model fetching, as well as its forecast creation.</p>
+                <h2>Why are your swell heights and periods different from other sites?</h2>
+                <p>RhodyCast uses the WaveWatch data from as close to the shore as possible. Other sites use data from offshore points such as where the Block Island buoy is located. This lets WaveWatch handle most of the propogation and allows RhodyCast to hopefully be more accurate and tunable. I am not trying to reinvent the wheel, just making as much data as possible available to those who are interested.</p>
+                <h2>Is there an iPhone or Android app?</h2>
+                <p>There is, although not by the same name. The <a href="http://mpiannucci.com/hackwinds">HackWinds</a> mobile apps now use Rhodycast as their forecast source!</p>
+                <h2>Is there an API? Can I use it in my app?</h2>
+                <p>There is a free API! Check out the data it gives <a href="/forecast_as_json">by clicking here</a>. And yes, you may use it in your aplpications, but give me a shout so I can boast about other people using it!</p>
+                <h2>How can I contact you?</h2>
+                <p>Send me an email at <a href="mailto:rhodysurf13@gmail.com?Subject=RhodyCast">rhodycast13@gmail.com</a>. Feel free to let me know that the forecast is very incorrect, have a feature request, or anything else!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{ end }}

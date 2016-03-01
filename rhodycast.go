@@ -23,9 +23,11 @@ var funcMap = template.FuncMap{
 }
 
 var indexTemplate = template.Must(template.New("base.html").Funcs(funcMap).ParseFiles("templates/base.html", "templates/index.html"))
+var aboutTemplate = template.Must(template.New("base.html").Funcs(funcMap).ParseFiles("templates/base.html", "templates/about.html"))
 
 func init() {
 	http.HandleFunc("/", indexHandler)
+	http.HandleFunc("/about", aboutHandler)
 	http.HandleFunc("/___fetch___", modelFetchHandler)
 	http.HandleFunc("/forecast_as_json", forecastJsonHandler)
 }
@@ -181,6 +183,12 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := indexTemplate.Execute(w, forecasts[0]); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+func aboutHandler(w http.ResponseWriter, r *http.Request) {
+	if err := aboutTemplate.Execute(w, nil); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
