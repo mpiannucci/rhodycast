@@ -1,7 +1,7 @@
 package rhodycast
 
 import (
-	"fmt"
+	"errors"
 	"html/template"
 	"io/ioutil"
 	"math"
@@ -11,6 +11,7 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
+	"google.golang.org/appengine/log"
 	"google.golang.org/appengine/urlfetch"
 
 	"github.com/mpiannucci/surfnerd"
@@ -47,7 +48,7 @@ func ToFixedPoint(num float64, precision int) float64 {
 	return float64(round(num*output)) / output
 }
 
-func fetchWaveForecast(loc surfnerd.Location, client *http.Client, w http.ResponseWriter) *surfnerd.WaveForecast {
+func fetchWaveForecast(loc surfnerd.Location, client *http.Client, w http.ResponseWriter) (*surfnerd.WaveForecast, error) {
 	waveModel := surfnerd.GetWaveModelForLocation(loc)
 	waveURL := waveModel.CreateURL(loc, 0, 60)
 
@@ -55,16 +56,15 @@ func fetchWaveForecast(loc surfnerd.Location, client *http.Client, w http.Respon
 	waveResp, waveHttpErr := client.Get(waveURL)
 	if waveHttpErr != nil {
 		http.Error(w, waveHttpErr.Error(), http.StatusInternalServerError)
-		return nil
+		return nil, waveHttpErr
 	}
-	fmt.Fprintf(w, "HTTP GET returned status %v\n", waveResp.Status)
 	defer waveResp.Body.Close()
 
 	// Read all of the raw data
 	waveContents, waveReadErr := ioutil.ReadAll(waveResp.Body)
 	if waveReadErr != nil {
 		http.Error(w, waveReadErr.Error(), http.StatusInternalServerError)
-		return nil
+		return nil, waveReadErr
 	}
 
 	// Put the forecast data into containers
@@ -72,13 +72,13 @@ func fetchWaveForecast(loc surfnerd.Location, client *http.Client, w http.Respon
 	waveForecast := surfnerd.WaveForecastFromModelData(waveModelData)
 	if waveForecast == nil {
 		http.Error(w, "Error parsing wavewatch data", http.StatusInternalServerError)
-		return nil
+		return nil, errors.New("Wave Forecast is Nil")
 	}
 
-	return waveForecast
+	return waveForecast, nil
 }
 
-func fetchWindForecast(loc surfnerd.Location, client *http.Client, w http.ResponseWriter) *surfnerd.WindForecast {
+func fetchWindForecast(loc surfnerd.Location, client *http.Client, w http.ResponseWriter) (*surfnerd.WindForecast, error) {
 	windModel := surfnerd.GetWindModelForLocation(loc)
 	windURL := windModel.CreateURL(loc, 0, 60)
 
@@ -86,16 +86,15 @@ func fetchWindForecast(loc surfnerd.Location, client *http.Client, w http.Respon
 	windResp, windHttpErr := client.Get(windURL)
 	if windHttpErr != nil {
 		http.Error(w, windHttpErr.Error(), http.StatusInternalServerError)
-		return nil
+		return nil, windHttpErr
 	}
-	fmt.Fprintf(w, "HTTP GET returned status %v\n", windResp.Status)
 	defer windResp.Body.Close()
 
 	// Read all of the raw data
 	windContents, windReadErr := ioutil.ReadAll(windResp.Body)
 	if windReadErr != nil {
 		http.Error(w, windReadErr.Error(), http.StatusInternalServerError)
-		return nil
+		return nil, windReadErr
 	}
 
 	// Put the forecast data into containers
@@ -103,10 +102,10 @@ func fetchWindForecast(loc surfnerd.Location, client *http.Client, w http.Respon
 	windForecast := surfnerd.WindForecastFromModelData(windModelData)
 	if windForecast == nil {
 		http.Error(w, "Error parsing wavewatch data", http.StatusInternalServerError)
-		return nil
+		return nil, errors.New("Wind Forecast is Nil")
 	}
 
-	return windForecast
+	return windForecast, nil
 }
 
 func modelFetchHandler(w http.ResponseWriter, r *http.Request) {
@@ -133,8 +132,21 @@ func modelFetchHandler(w http.ResponseWriter, r *http.Request) {
 		LocationName: "Narragansett",
 	}
 
-	waveForecast := fetchWaveForecast(riWaveLocation, client, w)
-	windForecast := fetchWindForecast(riWindLocation, client, w)
+	waveForecast, waveError := fetchWaveForecast(riWaveLocation, client, w)
+	windForecast, windError := fetchWindForecast(riWindLocation, client, w)
+
+	if waveError != nil {
+		log.Errorf(ctxParent, waveError.Error())
+		http.Error(w, waveError.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if windError != nil {
+		log.Errorf(ctxParent, windError.Error())
+		http.Error(w, windError.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	surfForecast := surfnerd.NewSurfForecast(riForecastLocation, 145.0, 0.02, waveForecast, windForecast)
 	surfForecast.ConvertToImperialUnits()
 
