@@ -110,7 +110,7 @@ func fetchWindForecast(loc surfnerd.Location, client *http.Client, w http.Respon
 
 func modelFetchHandler(w http.ResponseWriter, r *http.Request) {
 	ctxParent := appengine.NewContext(r)
-	ctx, _ := context.WithTimeout(ctxParent, 60*time.Second)
+	ctx, _ := context.WithTimeout(ctxParent, 480*time.Second)
 	client := urlfetch.Client(ctx)
 
 	// Set the location to fetch from
